@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحدي الإتقان | محمد عبدالحكيم</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --primary: #6C63FF; --success: #00C851; --danger: #ff4444;
+            --bg: #f8f9fa; --card: #ffffff; --text: #2d3436;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --primary: #818cf8;
+        }
+        * { transition: all 0.25s ease; font-family: 'Cairo', sans-serif; }
+        body {
+            margin: 0; background-color: var(--bg); color: var(--text);
+            display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
+        }
+        .game-card {
+            width: 90%; max-width: 480px; background: var(--card);
+            padding: 30px; border-radius: 40px; text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.1); position: relative;
+        }
+        .profile-wrapper { width: 140px; height: 140px; margin: -100px auto 15px; }
+        .profile-img {
+            width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--primary);
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4); object-fit: cover; background-color: #eee;
+        }
+        .header h2 { margin: 10px 0 5px; font-weight: 900; color: var(--primary); }
+        .theme-toggle { position: absolute; top: 25px; left: 25px; cursor: pointer; font-size: 1.4rem; }
+        
+        .screen { display: none; }
+        .active { display: block; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        button, select { padding: 15px; border-radius: 18px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; background: rgba(0,0,0,0.05); color: var(--text); }
+        .start-btn { grid-column: span 2; background: var(--primary); color: white; font-size: 1.4rem; }
+
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 25px; background: rgba(108, 99, 255, 0.1); border-radius: 25px; font-weight: 900; }
+        .question { font-size: 4.5rem; margin: 20px 0; font-weight: 900; color: var(--primary); }
+        .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+        .answer-btn { background: var(--card); border: 3px solid var(--primary); font-size: 2.3rem; border-radius: 25px; padding: 12px; box-shadow: 0 8px 0 var(--primary); }
+        .answer-btn:active { transform: translateY(8px); box-shadow: none; }
+        
+        .best-score { font-size: 0.8rem; color: var(--primary); margin-top: 10px; font-weight: bold; }
+        .congrats-card { padding: 20px; border-radius: 30px; background: var(--success); color: white; }
+
+        .is-correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
+        .is-wrong { animation: shake 0.4s; background: var(--danger) !important; color: white !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+</head>
+<body data-theme="light">
+
+    <audio id="snd-correct" src="1.mp3" preload="auto"></audio>
+    <audio id="snd-wrong" src="2.mp3" preload="auto"></audio>
+
+    <div class="game-card">
+        <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
+        <div class="profile-wrapper">
+            <img id="student-img" class="profile-img" src="student.jpeg" onerror="this.src='https://ui-avatars.com/api/?name=محمد+عبدالحكيم&background=6C63FF&color=fff&size=200'">
+        </div>
+
+        <div class="header">
+            <h2>محمد عبدالحكيم الحاج</h2>
+            <p>إشراف أ. رشا أمين الحضرمي</p>
+        </div>
+
+        <div id="setup-view" class="screen active">
+            <div class="controls">
+                <select id="digit-select" onchange="updateBestTimeDisplay()">
+                    <option value="2">جدول 2</option>
+                    <option value="3">جدول 3</option>
+                    <option value="4">جدول 4</option>
+                    <option value="5">جدول 5</option>
+                </select>
+                <select id="mode-select" onchange="updateBestTimeDisplay()">
+                    <option value="mul">ضرب (×)</option>
+                    <option value="div">قسمة (÷)</option>
+                </select>
+                <button class="start-btn" onclick="launchChallenge()">ابدأ تحدي الـ 10 أرقام 🚀</button>
+            </div>
+            <div id="best-time-msg" class="best-score"></div>
+        </div>
+
+        <div id="game-view" class="screen">
+            <div class="stats-row">
+                <span>🔢 السؤال: <span id="progress">1</span> / 10</span>
+                <span>⏱ <span id="clock">0</span> ث</span>
+            </div>
+            <div class="question" id="q-display">--</div>
+            <div class="answers-grid" id="choices-area"></div>
+        </div>
+
+        <div id="result-view" class="screen">
+            <div class="congrats-card">
+                <h2 id="final-msg">ألف مبروك!</h2>
+                <p id="time-result"></p>
+                <p id="record-msg" style="font-weight: 900; background: rgba(255,255,255,0.2); border-radius: 10px;"></p>
+                <button onclick="location.reload()" style="background: white; color: var(--success); margin-top: 15px; width: 100%;">العودة للرئيسية 🏠</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let correctValue, currentStep = 1, startTime, timerInterval;
+        let selectedTable, selectedMode;
+
+        function toggleTheme() {
+            const b = document.body;
+            b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+        }
+
+        function updateBestTimeDisplay() {
+            const table = document.getElementById('digit-select').value;
+            const mode = document.getElementById('mode-select').value;
+            const record = localStorage.getItem(`best_${mode}_${table}`);
+            const msg = document.getElementById('best-time-msg');
+            msg.innerText = record ? `أفضل وقت سابق لهذا الجدول: ${record} ثانية` : "لم يتم حل هذا الجدول سابقاً";
+        }
+        updateBestTimeDisplay();
+
+        function launchChallenge() {
+            selectedTable = parseInt(document.getElementById('digit-select').value);
+            selectedMode = document.getElementById('mode-select').value;
+            currentStep = 1;
+            
+            document.getElementById('setup-view').classList.remove('active');
+            document.getElementById('game-view').classList.add('active');
+            generateQuestion();
+            
+            startTime = Date.now();
+            timerInterval = setInterval(() => {
+                document.getElementById('clock').innerText = Math.floor((Date.now() - startTime)/1000);
+            }, 1000);
+        }
+
+        function generateQuestion() {
+            document.getElementById('progress').innerText = currentStep;
+            
+            if (selectedMode === 'mul') {
+                correctValue = selectedTable * currentStep;
+                document.getElementById('q-display').innerText = `${selectedTable} × ${currentStep}`;
+            } else {
+                correctValue = currentStep;
+                document.getElementById('q-display').innerText = `${selectedTable * currentStep} ÷ ${selectedTable}`;
+            }
+
+            drawOptions();
+        }
+
+        function drawOptions() {
+            const area = document.getElementById('choices-area');
+            area.innerHTML = '';
+            let ops = [correctValue];
+            while(ops.length < 4) {
+                let w = Math.floor(Math.random() * (selectedTable * 10)) + 1;
+                if(!ops.includes(w)) ops.push(w);
+            }
+            ops.sort(() => Math.random() - 0.5);
+
+            ops.forEach(v => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.innerText = v;
+                btn.onclick = () => verify(v, btn);
+                area.appendChild(btn);
+            });
+        }
+
+        function verify(val, btn) {
+            if(val === correctValue) {
+                btn.classList.add('is-correct');
+                document.getElementById('snd-correct').play();
+                
+                if(currentStep < 10) {
+                    currentStep++;
+                    setTimeout(generateQuestion, 600);
+                } else {
+                    finishGame();
+                }
+            } else {
+                btn.classList.add('is-wrong');
+                document.getElementById('snd-wrong').play();
+                setTimeout(() => btn.classList.remove('is-wrong'), 500);
+            }
+        }
+
+        function finishGame() {
+            clearInterval(timerInterval);
+            const totalTime = Math.floor((Date.now() - startTime)/1000);
+            const recordKey = `best_${selectedMode}_${selectedTable}`;
+            const oldRecord = localStorage.getItem(recordKey);
+            
+            document.getElementById('game-view').classList.remove('active');
+            document.getElementById('result-view').classList.add('active');
+            
+            document.getElementById('time-result').innerText = `أنهيت الجدول في ${totalTime} ثانية`;
+            document.getElementById('final-msg').innerText = `بطل يا محمد! اجتزت جدول الـ ${selectedTable} بجدارة واستحقاق 🏆`;
+
+            if(!oldRecord || totalTime < oldRecord) {
+                localStorage.setItem(recordKey, totalTime);
+                document.getElementById('record-msg').innerText = oldRecord ? "تهانينا! لقد كسرت رقمك القياسي السابق وأصبحت أسرع! 🔥" : "هذا رقم قياسي جديد لك! بطل!";
+            } else {
+                document.getElementById('record-msg').innerText = `رقمك القياسي السابق كان ${oldRecord} ثانية. حاول أن تكون أسرع في المرة القادمة!`;
+            }
+
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
+        }
+    </script>
+</body>
+</html>
