@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحدي الإتقان الذكي | محمد عبدالحكيم</title>
+    <title>تحدي الأذكياء | محمد عبدالحكيم</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -19,40 +19,44 @@
             display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden;
         }
         .game-card {
-            width: 90%; max-width: 480px; background: var(--card);
-            padding: 30px; border-radius: 40px; text-align: center;
+            width: 90%; max-width: 450px; background: var(--card);
+            padding: 35px; border-radius: 40px; text-align: center;
             box-shadow: 0 25px 50px rgba(0,0,0,0.1); position: relative;
+            border: 2px solid rgba(0,0,0,0.05);
         }
-        .profile-wrapper { width: 140px; height: 140px; margin: -100px auto 15px; }
-        .profile-img {
-            width: 100%; height: 100%; border-radius: 50%; border: 6px solid var(--primary);
-            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4); object-fit: cover; background-color: #eee;
+        .profile-container {
+            width: 140px; height: 140px; margin: -100px auto 15px;
+            border-radius: 50%; border: 6px solid var(--primary);
+            background: #eee url('student.jpeg') center/cover no-repeat;
+            box-shadow: 0 10px 25px rgba(108, 99, 255, 0.4); z-index: 5;
+            display: block;
         }
+        .header h2 { margin: 10px 0 5px; font-weight: 900; color: var(--primary); font-size: 1.6rem; }
+        .header p { margin: 0 0 20px; font-size: 0.95rem; opacity: 0.8; font-weight: bold; }
         .theme-toggle { position: absolute; top: 25px; left: 25px; cursor: pointer; font-size: 1.4rem; }
-        
+
         .screen { display: none; }
         .active { display: block; animation: zoomIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         @keyframes zoomIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
         .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-        button, select { padding: 15px; border-radius: 18px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; background: rgba(0,0,0,0.05); color: var(--text); }
-        .start-btn { grid-column: span 2; background: var(--primary); color: white; font-size: 1.4rem; }
+        button, select { padding: 15px; border-radius: 18px; border: none; font-weight: bold; font-size: 1.1rem; cursor: pointer; background: rgba(0,0,0,0.05); color: var(--text); outline: none; }
+        .start-btn { grid-column: span 2; background: var(--primary); color: white; font-size: 1.4rem; box-shadow: 0 8px 15px rgba(108, 99, 255, 0.3); margin-top: 10px; }
 
-        .stats-row { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 20px; background: rgba(108, 99, 255, 0.1); border-radius: 20px; font-weight: 800; font-size: 0.9rem;}
-        .question { font-size: 4.5rem; margin: 20px 0; font-weight: 900; color: var(--primary); }
+        .stats-row { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 12px 25px; background: rgba(108, 99, 255, 0.1); border-radius: 25px; font-weight: 900; }
+        .question { font-size: 5rem; margin: 25px 0; font-weight: 900; color: var(--primary); text-shadow: 3px 3px 0px rgba(0,0,0,0.05); }
         .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-        .answer-btn { background: var(--card); border: 3px solid var(--primary); font-size: 2.3rem; border-radius: 25px; padding: 12px; box-shadow: 0 8px 0 var(--primary); position: relative;}
+        .answer-btn { background: var(--card); border: 3px solid var(--primary); font-size: 2.5rem; border-radius: 25px; padding: 12px; box-shadow: 0 8px 0 var(--primary); position: relative; }
         .answer-btn:active { transform: translateY(8px); box-shadow: none; }
-        
-        /* تأثير مساعدة محمد */
+
+        /* تأثيرات مساعدة وتنبيه */
         .hint-pulse { animation: pulseHelper 0.6s infinite alternate; border-color: #ff9f43 !important; box-shadow: 0 0 20px #ff9f43 !important; }
         @keyframes pulseHelper { from { transform: scale(1); } to { transform: scale(1.05); } }
-
-        .is-correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; }
-        .is-wrong { animation: shake 0.4s; background: var(--danger) !important; color: white !important; }
+        .is-correct { background: var(--success) !important; color: white !important; border-color: var(--success) !important; box-shadow: 0 8px 0 #009432 !important; }
+        .is-wrong { animation: shake 0.4s; background: var(--danger) !important; color: white !important; border-color: var(--danger) !important; box-shadow: 0 8px 0 #cc0000 !important; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-12px); } 75% { transform: translateX(12px); } }
-        
-        .result-info { margin: 15px 0; font-size: 1.1rem; }
+
+        .record-box { margin-top: 15px; font-size: 0.85rem; color: var(--primary); line-height: 1.6; background: rgba(108, 99, 255, 0.05); padding: 10px; border-radius: 15px; }
     </style>
 </head>
 <body data-theme="light">
@@ -62,34 +66,32 @@
 
     <div class="game-card">
         <div class="theme-toggle" onclick="toggleTheme()">🌓</div>
-        <div class="profile-wrapper">
-            <img id="student-img" class="profile-img" src="student.jpeg" onerror="this.src='https://ui-avatars.com/api/?name=محمد+عبدالحكيم&background=6C63FF&color=fff&size=200'">
-        </div>
+        <div class="profile-container" id="avatar"></div>
 
         <div class="header">
-            <h3>محمد عبدالحكيم الحاج</h3>
+            <h2>البطل محمد عبدالحكيم الحاج</h2>
             <p>إشراف أ. رشا أمين الحضرمي</p>
         </div>
 
         <div id="setup-view" class="screen active">
             <div class="controls">
-                <select id="digit-select">
+                <select id="digit-select" onchange="showRecords()">
                     <option value="2">جدول 2</option><option value="3">جدول 3</option>
                     <option value="4">جدول 4</option><option value="5">جدول 5</option>
                 </select>
-                <select id="mode-select">
+                <select id="mode-select" onchange="showRecords()">
                     <option value="mul">ضرب (×)</option><option value="div">قسمة (÷)</option>
                 </select>
-                <button class="start-btn" onclick="launchChallenge()">ابدأ التحدي الذكي 🚀</button>
+                <button class="start-btn" onclick="launchChallenge()">ابدأ التحدي يا بطل 🚀</button>
             </div>
-            <div id="record-display" style="font-size: 0.8rem; margin-top: 10px; color: var(--primary);"></div>
+            <div id="record-display" class="record-box"></div>
         </div>
 
         <div id="game-view" class="screen">
             <div class="stats-row">
                 <span>⏱ <span id="clock">0</span> ث</span>
-                <span>❌ أخطاء: <span id="error-count">0</span></span>
-                <span>🔢 متبقي: <span id="remaining">10</span></span>
+                <span>❌ <span id="error-count">0</span></span>
+                <span>🔢 <span id="remaining">10</span></span>
             </div>
             <div class="question" id="q-display">--</div>
             <div class="answers-grid" id="choices-area"></div>
@@ -98,12 +100,12 @@
         <div id="result-view" class="screen">
             <div style="background: var(--success); color: white; padding: 25px; border-radius: 30px;">
                 <h2 id="final-status">ممتاز يا محمد!</h2>
-                <div class="result-info">
-                    <p>الوقت: <span id="res-time"></span> ثانية</p>
-                    <p>الأخطاء: <span id="res-errors"></span></p>
+                <div style="margin: 15px 0; font-weight: bold;">
+                    <p>الوقت المستغرق: <span id="res-time"></span> ثانية</p>
+                    <p>عدد الأخطاء: <span id="res-errors"></span></p>
                 </div>
-                <p id="feedback-msg" style="font-weight: 900;"></p>
-                <button onclick="location.reload()" style="background: white; color: var(--success); width: 100%; margin-top: 15px;">تحدي جديد 🔄</button>
+                <p id="feedback-msg" style="font-weight: 900; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 15px;"></p>
+                <button onclick="location.reload()" style="background: white; color: var(--success); width: 100%; margin-top: 15px; border-radius: 15px;">تحدي جديد 🔄</button>
             </div>
         </div>
     </div>
@@ -118,14 +120,26 @@
             b.setAttribute('data-theme', b.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
         }
 
+        function showRecords() {
+            const table = document.getElementById('digit-select').value;
+            const mode = document.getElementById('mode-select').value;
+            const recordTime = localStorage.getItem(`time_${mode}_${table}`);
+            const recordErr = localStorage.getItem(`err_${mode}_${table}`);
+            const display = document.getElementById('record-display');
+            
+            if(recordTime) {
+                display.innerHTML = `سجلك السابق لهذا الجدول:<br>⏱ وقت: ${recordTime} ثانية | ❌ أخطاء: ${recordErr}`;
+            } else {
+                display.innerHTML = "أول مرة تخوض هذا التحدي؟ انطلق يا بطل!";
+            }
+        }
+        showRecords();
+
         function launchChallenge() {
             selectedTable = parseInt(document.getElementById('digit-select').value);
             selectedMode = document.getElementById('mode-select').value;
-            
-            // إنشاء قائمة عشوائية من 1 إلى 10
             tableList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].sort(() => Math.random() - 0.5);
-            currentIdx = 0;
-            errorsInSession = 0;
+            currentIdx = 0; errorsInSession = 0;
             
             document.getElementById('setup-view').classList.remove('active');
             document.getElementById('game-view').classList.add('active');
@@ -158,17 +172,14 @@
             area.innerHTML = '';
             let ops = [correctValue];
             while(ops.length < 4) {
-                let w = Math.floor(Math.random() * (selectedTable * 10)) + 1;
-                if(!ops.includes(w)) ops.push(w);
+                let w = correctValue + (Math.random() > 0.5 ? 2 : -2) * (Math.floor(Math.random() * 4) + 1);
+                if(w >= 0 && !ops.includes(w)) ops.push(w);
             }
             ops.sort(() => Math.random() - 0.5);
-
             ops.forEach(v => {
                 const btn = document.createElement('button');
-                btn.className = 'answer-btn';
-                btn.id = `opt-${v}`;
-                btn.innerText = v;
-                btn.onclick = () => verify(v, btn);
+                btn.className = 'answer-btn'; btn.id = `opt-${v}`;
+                btn.innerText = v; btn.onclick = () => verify(v, btn);
                 area.appendChild(btn);
             });
         }
@@ -183,18 +194,13 @@
             } else {
                 btn.classList.add('is-wrong');
                 document.getElementById('snd-wrong').play();
-                errorsInSession++;
-                currentQErrors++;
+                errorsInSession++; currentQErrors++;
                 document.getElementById('error-count').innerText = errorsInSession;
 
                 if(currentQErrors >= 2) {
-                    // مساعدة: تلميض الرقم الصحيح
                     const correctBtn = document.getElementById(`opt-${correctValue}`);
                     if(correctBtn) correctBtn.classList.add('hint-pulse');
-                    
-                    // إضافة الرقم لنهاية القائمة ليعيده لاحقاً
                     tableList.push(tableList[currentIdx]);
-                    
                     setTimeout(() => {
                         currentIdx++;
                         if(currentIdx < tableList.length) generateQuestion();
@@ -213,16 +219,19 @@
             document.getElementById('res-time').innerText = totalTime;
             document.getElementById('res-errors').innerText = errorsInSession;
             
-            const recordKey = `best_${selectedMode}_${selectedTable}`;
-            const oldRecord = localStorage.getItem(recordKey);
-
-            let msg = `بطل يا محمد! اجتزت جدول الـ ${selectedTable} بجدارة! 🏆`;
-            if(!oldRecord || totalTime < parseInt(oldRecord)) {
-                localStorage.setItem(recordKey, totalTime);
-                msg += oldRecord ? "<br>تهانينا! أنت أسرع من المرة السابقة! 🔥" : "<br>هذا رقم قياسي جديد!";
+            const timeKey = `time_${selectedMode}_${selectedTable}`;
+            const errKey = `err_${selectedMode}_${selectedTable}`;
+            const oldTime = localStorage.getItem(timeKey);
+            
+            let feedback = `أحسنت يا محمد! اجتزت الجدول بجدارة!`;
+            if(!oldTime || totalTime < parseInt(oldTime)) {
+                localStorage.setItem(timeKey, totalTime);
+                localStorage.setItem(errKey, errorsInSession);
+                feedback = "وااو! رقم قياسي جديد! أنت بطل سريع جداً 🔥";
             }
-            document.getElementById('feedback-msg').innerHTML = msg;
-            confetti({ particleCount: 150, spread: 70 });
+            
+            document.getElementById('feedback-msg').innerText = feedback;
+            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
         }
     </script>
 </body>
